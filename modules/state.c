@@ -109,8 +109,7 @@ State state_create() {
 // Επιστρέφει τις βασικές πληροφορίες του παιχνιδιού στην κατάσταση state
 
 StateInfo state_info(State state) {
-	// Προς υλοποίηση
-	return NULL;
+	return &(state->info);
 }
 
 // Επιστρέφει μια λίστα με όλα τα αντικείμενα του παιχνιδιού στην κατάσταση state,
@@ -118,8 +117,34 @@ StateInfo state_info(State state) {
 // γωνία top_left και κάτω δεξιά bottom_right.
 
 List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
-	// Προς υλοποίηση
-	return NULL;
+	List list = list_create(free);
+	// The current object from the main vector of objects, as well as it's cordinates
+	Object crntobject;
+	int crntx;
+	int crnty;
+    
+	// The cordinates of top left
+    int top_leftx=top_left.x;
+	int top_lefty=top_left.y;
+
+    // The cordinates of bottom right
+	int bottom_rightx=bottom_right.x;
+	int bottom_righty=bottom_right.y;
+
+    // Loop for every object contained in vector
+	for (int i=0;i<vector_size(state->objects);i++){
+        
+		// The current object is taken from the vector, and it's cordinates are held
+        crntobject=(Object)vector_get_at(state->objects,i);
+		crntx=crntobject->position.x;
+		crnty=crntobject->position.y;
+        
+		// If the object is located within the bounds set by top right and bottom left, it is inserted in the list
+		if ((top_leftx>=crntx)&(top_lefty>=crnty)&(bottom_rightx<=crntx)&(bottom_righty<=crnty)) list_insert_next(list,0,crntobject);
+	}
+    
+	// The filled list is returned
+	return list;
 }
 
 // Ενημερώνει την κατάσταση state του παιχνιδιού μετά την πάροδο 1 frame.
