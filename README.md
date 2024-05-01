@@ -16,7 +16,7 @@ __Α.Μ.__: sdi2300149
 Συμπληρώστε εδώ τις ασκήσεις (και τυχόν bonus) που παραδίδετε. Αν κάποια άσκηση
 οβρίσκεται σε μη αναμενόμενα αρχεία αναφέρετε και τα αρχεία αυτά.
 - 1
-- ...
+- 2
 
 ### Documentation
 
@@ -45,3 +45,36 @@ In state_test.c, test_state_create() was filled. Three types of tests were added
 is only included in the list it creates if it is in the correct location as dictated by "top_left" and "bottom_right"
 3. Tests to check if the objects created are of the correct type (asteroids), location and size. To do this,
 state_objects is again used to create a list of all objects created by state_create.
+
+Part 2:
+In state.c, state_update was filled. In state_test.c, test_state_update was filled.
+
+state_update handles updating the state to the next frame. It recieves the state and the struct of the keys
+being pressed this frame. Firstly if the key p is pressed, the game becomes paused. Afterwards, if the game
+isn't paused or n is pressed the rest of the function is passed. Else the function ends there. Next, the 
+function updates all object in the vector (accessed through the struct "state") by changing their location 
+according to their speed. Next the same thing happens but for the spaceship object. Then, if right is pressed,
+the spaceship's orientation is rotated by the ammount dictated by (SPACESHIP_ROTATION) to the right. The same
+then happens for the left, if the left key is pressed. If up is pressed, the spaceships speed is increased by
+the ammmount dictated by it's rotation and (SPACESHIP_ROTATION). If it is not pressed, the spaceships speed is
+decreased by suntracting or adding (depending on if the starting speed is positive or negative) to the speed vectors
+x any y floats. Because the speed's orientation needs to stay the same, calculating the scale between the x speed
+and the y speed is required. This scale is then used to moddify the two speeds correctly. If any of the x or y
+speeds are 1. Negative (if the starting x or y speed was positive) 2. Positive (if the starting x or y speed
+was positive) , it or they instead become zero.
+
+test_state_update tests the previous function by pressing different buttons and calling state_update to see if it
+updates the state properly. The following tests were added: 
+1. A test for the p button. The function makes sure that if p is pressed, the state does not update.
+2. A test for the n button. The function makes sure that if n is pressed while the game is paused, the
+game updates the state despite it's paused statues, for one frame.
+3. A test that if spaceship has gained a speed (SPACESHIP_ACCELERATION in this case), it will move that many
+pixels in the correct direction next frame. In the same test, it is checked that when up is not pressed, the
+spaceship loses speed (SPACESHIP_SLOWDOWN), but does not gain speed in the opposite direction.
+4. A test for the right button. It is checked that the spaceship changes orientation to the right when pressing
+the right button. In the same test, it is checked that the spaceship can gain speed on both the x and y axis (now
+that it has turned from looking straight up).
+5. A test for the left button. Since the ship has turned right for one frame and left for one frame, it should
+have returned to it's original rotation.  In the same test, it is checked that the spaceship can move on both the
+x and y axis (now that it has gained speed in both axis)
+that it has turned from looking straight up).

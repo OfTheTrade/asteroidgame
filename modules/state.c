@@ -151,7 +151,74 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 // Το keys περιέχει τα πλήκτρα τα οποία ήταν πατημένα κατά το frame αυτό.
 
 void state_update(State state, KeyState keys) {
-	// Προς υλοποίηση
+
+    // If p is pressed the game is paused
+	if (keys->p == true) state->info.paused=true;
+    
+	// If the game isn't paused or n is pressed the state updates
+    Object crntobject;
+	if ((state->info.paused == false)||(keys->n == true)){
+          
+		  // Update the objects in the vector, changing their position according to their speed
+	      for(int i = 0;i<vector_size(state->objects);i++){
+		        crntobject = (Object)vector_get_at(state->objects,i);
+				crntobject->position=vec2_add(crntobject->position,crntobject->speed);
+		  }
+		  // The same but for the spaceship
+		  state->info.spaceship->position = vec2_add(state->info.spaceship->position,state->info.spaceship->speed);
+          
+		  // If right is pressed move the spaceships orientation to the right
+		  if (keys->right  == true) 
+		        state->info.spaceship->orientation = vec2_rotate(state->info.spaceship->orientation, -SPACESHIP_ROTATION);
+		  // If left is pressed move the spaceships orientation to the left
+		  if (keys->left == true) 
+		        state->info.spaceship->orientation = vec2_rotate(state->info.spaceship->orientation, SPACESHIP_ROTATION);
+		  
+		  // If up is pressed , add to the spaceship's speed.
+		  if (keys->up == true){ 
+		        state->info.spaceship->speed = vec2_add(state->info.spaceship->speed,vec2_scale(state->info.spaceship->orientation,SPACESHIP_ACCELERATION));				
+		  }else if((state->info.spaceship->speed.x !=0)||(state->info.spaceship->speed.y !=0)){
+		        // If up is not pressed, reduce the spaceship's speed	    
+				int addorsub1=-1;
+				int addorsub2=-1;
+                
+			    float xvalue = state->info.spaceship->speed.x;
+				// Figure out if the horizontal speed is positive so we can reduce it properly (add or sub)
+				if (xvalue<0){
+					xvalue=-xvalue;
+                    addorsub1=1;
+				}
+				// Figure out if the vertical speed is positive so we can reduce it properly (add or sub)
+				float yvalue = state->info.spaceship->speed.y;
+				if (yvalue<0){
+					yvalue=-yvalue;
+                    addorsub2=1;
+				}
+                
+				// The scale is usefull because we need to reduce the speed
+				// by reducing it's x and y cordinates while not changing it's orientation
+			    double scale = (xvalue) / ((double)xvalue + (double)yvalue);
+
+				float holdx = (float)(state->info.spaceship->speed.x + (addorsub1*scale*SPACESHIP_SLOWDOWN));
+				float holdy = (float)(state->info.spaceship->speed.y + (addorsub2*(1-scale)*SPACESHIP_SLOWDOWN));
+
+				// Slowing down should not result in negative speeds
+				// If the starting speed was positive, it should not end up negative
+				if (addorsub1 == -1){
+				    if (holdx < 0) holdx = 0;
+				}else{
+					// If it was not positive, it should not end up positive
+					if (holdx > 0) holdx = 0;
+				}
+				// Same for the y cordinate
+				if (addorsub2 == -1){
+				    if (holdy < 0) holdy = 0;
+				}else{
+				    if (holdy > 0) holdy = 0;
+				}
+				state->info.spaceship->speed = (Vector2){holdx,holdy};
+			}		
+	}
 }
 
 // Καταστρέφει την κατάσταση state ελευθερώνοντας τη δεσμευμένη μνήμη.

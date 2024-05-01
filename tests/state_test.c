@@ -91,10 +91,17 @@ void test_state_create() {
         
 		// Check that the size of the asteroid is within acceptable bounds
 		TEST_ASSERT((crntobject->size <= ASTEROID_MAX_SIZE)&&(crntobject->size >= ASTEROID_MIN_SIZE));
-         
+
+        // Check to see speed is within acceptable bounds
+		float linex = (crntobject->speed.x)*(crntobject->speed.x);
+		float liney = (crntobject->speed.y)*(crntobject->speed.y);
+
+		TEST_ASSERT(linex + liney <= ASTEROID_MAX_SPEED*ASTEROID_MAX_SPEED);
+		TEST_ASSERT(linex + liney >= ASTEROID_MIN_SPEED*ASTEROID_MIN_SPEED);
 		// Moving on to the next node
 		crntnode=list_next(list,crntnode);
     }
+
 }
 
 void test_state_update() {
@@ -103,10 +110,10 @@ void test_state_update() {
 
 	// Πληροφορίες για τα πλήκτρα (αρχικά κανένα δεν είναι πατημένο)
 	struct key_state keys = { false, false, false, false, false, false, false };
-	
+
 	// Χωρίς κανένα πλήκτρο, το διαστημόπλοιο παραμένει σταθερό με μηδενική ταχύτητα
 	state_update(state, &keys);
-
+	
 	TEST_ASSERT( vec2_equal( state_info(state)->spaceship->position, (Vector2){0,0}) );
 	TEST_ASSERT( vec2_equal( state_info(state)->spaceship->speed,    (Vector2){0,0}) );
 
@@ -114,10 +121,57 @@ void test_state_update() {
 	keys.up = true;
 	state_update(state, &keys);
 
+	// (INTERMITION) Pressing p pauses the game. It remains in the last state.
+
+	keys.p = true;
+	state_update(state, &keys);
+
+    // Same as before
 	TEST_ASSERT( vec2_equal( state_info(state)->spaceship->position, (Vector2){0,0}) );
 	TEST_ASSERT( vec2_equal( state_info(state)->spaceship->speed,    (Vector2){0,SPACESHIP_ACCELERATION}) );
+    
+	keys.p = false;
+	state_update(state, &keys);
 
-	// Προσθέστε επιπλέον ελέγχους
+    // Same as before
+	TEST_ASSERT( vec2_equal( state_info(state)->spaceship->position, (Vector2){0,0}) );
+	TEST_ASSERT( vec2_equal( state_info(state)->spaceship->speed,    (Vector2){0,SPACESHIP_ACCELERATION}) );
+    
+	// While pressing n the game will continue
+	keys.n = true;
+
+    // Without any further presses, the spaceship will move as dictated by the speed it was given before (SPACESHIP_ACCELERATION).
+	// Then the speed will decrease by SPACESHIP_SLOWDOWN, but won't go bellow (or above, if the staring speed was negative) zero.
+	// In this case it becomes zero.
+	keys.up = false;
+	state_update(state, &keys);
+
+	TEST_ASSERT( vec2_equal( state_info(state)->spaceship->position, (Vector2){0,SPACESHIP_ACCELERATION}) );
+	TEST_ASSERT( vec2_equal( state_info(state)->spaceship->speed, (Vector2){0,0}) );
+
+    // Pressing only right, the orientation of the ship should change.
+	// If we also press up, the ships speed should increase in both axes (x and y)
+	keys.right = true;
+	keys.up = true;
+    state_update(state, &keys);
+	
+	TEST_ASSERT( !vec2_equal( state_info(state)->spaceship->orientation, (Vector2){0,0}));
+
+	TEST_ASSERT( state_info(state)->spaceship->speed.x !=0);
+	TEST_ASSERT( state_info(state)->spaceship->speed.y !=0);
+
+	// Pressing left once after pressing right once should return the ship to it's original orientation (0,1)
+	// After accelerating in both axes, the ships x and y cordinates should change.
+	keys.up = false;
+    keys.right = false;
+    keys.left = true;
+	state_update(state, &keys);
+
+	TEST_ASSERT( vec2_equal( state_info(state)->spaceship->orientation, (Vector2){0,1}));
+
+	TEST_ASSERT( state_info(state)->spaceship->position.x !=0);
+	TEST_ASSERT( state_info(state)->spaceship->position.y !=0);	
+
 }
 
 
