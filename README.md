@@ -17,6 +17,7 @@ __Α.Μ.__: sdi2300149
 οβρίσκεται σε μη αναμενόμενα αρχεία αναφέρετε και τα αρχεία αυτά.
 - 1
 - 2
+- 3
 
 ### Documentation
 
@@ -78,3 +79,21 @@ that it has turned from looking straight up).
 have returned to it's original rotation.  In the same test, it is checked that the spaceship can move on both the
 x and y axis (now that it has gained speed in both axis)
 that it has turned from looking straight up).
+
+Part 3:
+In state.c, state_update was filled with the new requierments.
+
+Firstly, the function now updates "speed_factor" when called and the game is not paused. It figures out how many times
+it has been increased already from it's starting value of 1 and then checks if the game score is hight enough to cause
+"speed_factor" to increase again. In the loop previously only used to change the coordinates of the objects in the states
+object vector, a counter has been set up to count how many asteroids are within ASTEROID_MAX_DIST of the ship. After it 
+exits the loop, if this ammount is less that ASTEROID_NUM, it adds enough asteroids for this number to become ASTEROID_NUM
+through add_asteroids. The score is increased by one for every asteroid created this way. Collision checks where also 
+added. The function parses the entire state vector , and (for every node) if the object it finds inside is a asteroid, it
+first checks if it collides with the spaceship (through CheckCollisionCircles). If it does, the asteroid is removed from the
+vector (by swapping the last nodes value with the current one and then removing the last node), and the score is halved. If 
+it does not collide with the spaceship the vector of objects is accesed again , checking if any of the objects is a bullet
+that collides with the current asteroid. If it is, the asteroid and the bullet is destroyed, 10 points are deducted from the
+score (without going bellow zero) and if the asteroid is big enough two smaller and faster asteroids are spawned at it's location.
+Lastly, the function now checks for a space key input. If it detects that, and it has been not been fired for 15 states, a bullet
+is created on the spaceship, with it's speed being affected by BULLET_SPEED and the spaceships rotation and speed.

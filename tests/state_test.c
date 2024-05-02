@@ -83,12 +83,11 @@ void test_state_create() {
 		TEST_ASSERT(crntobject->type == ASTEROID);
         
 		// Check that the distance to the spaceship (0.0 currently) is within bounds 
-		TEST_ASSERT((crntobject->position.x <= ASTEROID_MAX_DIST)&&(crntobject->position.x >= -ASTEROID_MAX_DIST));
-		TEST_ASSERT((crntobject->position.y <= ASTEROID_MAX_DIST)&&(crntobject->position.y >= -ASTEROID_MAX_DIST));
+		float distsqr = (crntobject->position.x)*(crntobject->position.x) + (crntobject->position.y)*(crntobject->position.y);
 
-	    TEST_ASSERT((crntobject->position.x >= ASTEROID_MIN_DIST)||(crntobject->position.x <= ASTEROID_MIN_DIST));
-		TEST_ASSERT((crntobject->position.y >= ASTEROID_MIN_DIST)||(crntobject->position.y <= ASTEROID_MIN_DIST));  
-        
+		TEST_ASSERT(distsqr <= ASTEROID_MAX_DIST*ASTEROID_MAX_DIST);
+		TEST_ASSERT(distsqr >= ASTEROID_MAX_DIST*ASTEROID_MAX_DIST);
+		
 		// Check that the size of the asteroid is within acceptable bounds
 		TEST_ASSERT((crntobject->size <= ASTEROID_MAX_SIZE)&&(crntobject->size >= ASTEROID_MIN_SIZE));
 
@@ -141,13 +140,12 @@ void test_state_update() {
 	keys.n = true;
 
     // Without any further presses, the spaceship will move as dictated by the speed it was given before (SPACESHIP_ACCELERATION).
-	// Then the speed will decrease by SPACESHIP_SLOWDOWN, but won't go bellow (or above, if the staring speed was negative) zero.
-	// In this case it becomes zero.
+	// Then the speed will decrease by SPACESHIP_SLOWDOWN %.
 	keys.up = false;
 	state_update(state, &keys);
 
 	TEST_ASSERT( vec2_equal( state_info(state)->spaceship->position, (Vector2){0,SPACESHIP_ACCELERATION}) );
-	TEST_ASSERT( vec2_equal( state_info(state)->spaceship->speed, (Vector2){0,0}) );
+	TEST_ASSERT( vec2_equal( state_info(state)->spaceship->speed, (Vector2){0,SPACESHIP_ACCELERATION*SPACESHIP_SLOWDOWN}) );
 
     // Pressing only right, the orientation of the ship should change.
 	// If we also press up, the ships speed should increase in both axes (x and y)
@@ -171,6 +169,16 @@ void test_state_update() {
 
 	TEST_ASSERT( state_info(state)->spaceship->position.x !=0);
 	TEST_ASSERT( state_info(state)->spaceship->position.y !=0);	
+
+	keys.left = false;
+	keys.n = false;
+
+	state_destroy(state);
+
+    //// TESTS FOR COLLISIONS
+
+	state_create(state);
+
 
 }
 
