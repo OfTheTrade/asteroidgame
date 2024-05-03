@@ -28,4 +28,9 @@
 		"arg7": "#",
 		"arg8": "#",
 	},
+	"files.associations": {
+		"interface.h": "c",
+		"adtlist.h": "c",
+		"adtvector.h": "c"
+	},
 }

@@ -131,7 +131,7 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 	int bottom_rightx=bottom_right.x;
 	int bottom_righty=bottom_right.y;
 
-    // Loop for every object contained in vector
+    // Loop for every object contained in the vector
 	for (int i=0;i<vector_size(state->objects);i++){
         
 		// The current object is taken from the vector, and it's cordinates are held
@@ -140,7 +140,7 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 		crnty=crntobject->position.y;
         
 		// If the object is located within the bounds set by top right and bottom left, it is inserted in the list
-		if ((top_leftx>=crntx)&(top_lefty>=crnty)&(bottom_rightx<=crntx)&(bottom_righty<=crnty)) list_insert_next(list,LIST_BOF,crntobject);
+		if ((top_leftx<=crntx)&(top_lefty>=crnty)&(bottom_rightx<=crntx)&(bottom_righty>=crnty)) list_insert_next(list,LIST_BOF,crntobject);
 	}
     
 	// The filled list is returned
@@ -160,9 +160,11 @@ void state_update(State state, KeyState keys) {
 	if ((state->info.paused == false)||(keys->n == true)){
 
         // Update the speed factor
+		
+		if (keys->enter == true) state->info.score = state->info.score + 10;
 		int scoreneeded = 1;
 		for (float i = (state->speed_factor - 1); i >= 0; i = i - 0.1) scoreneeded = scoreneeded*100;
-        if (state->info.score >= scoreneeded) state->speed_factor = state->speed_factor + 10;
+        if (state->info.score >= scoreneeded) state->speed_factor = state->speed_factor + 0.1;
         
         Object tempobject;
         Object crntobject;
@@ -188,7 +190,7 @@ void state_update(State state, KeyState keys) {
 		}
        
 	   // Collision checks
-       for(int i = 0;i<vector_size(state->objects);i++){
+    if (0 == 1){   for(int i = 0;i<vector_size(state->objects);i++){
 
           crntobject = vector_get_at(state->objects,i);
 
@@ -246,7 +248,7 @@ void state_update(State state, KeyState keys) {
 			
 			}
 
-	    }
+	    } }
 
 	   
 		// Add any asteroids needed to have ASTEROID_NUM many near the ship. Update the score
@@ -288,7 +290,7 @@ void state_update(State state, KeyState keys) {
 // Καταστρέφει την κατάσταση state ελευθερώνοντας τη δεσμευμένη μνήμη.
 
 void state_destroy(State state) {
-	// Free all parts of "state" that are in the heap and then "state" itself
+	//Free all parts of "state" that are in the heap and then "state" itself
 	free(state->info.spaceship);
     vector_destroy(state->objects);
 	free(state);

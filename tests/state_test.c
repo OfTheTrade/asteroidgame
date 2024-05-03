@@ -60,8 +60,8 @@ void test_state_create() {
 	TEST_ASSERT(list!=NULL);
 	TEST_ASSERT(list_size(list) == 0);
 
-    // This area of the screen is set to this size (>=ASTEROID_MAX_DIST) so that it contains 
-	// all asteroids created by state_create
+    // This area of the screen is set to this size (>ASTEROID_MAX_DIST) so that it contains 
+	// all asteroids created by state_create 
     topright = (Vector2){ASTEROID_MAX_DIST, ASTEROID_MAX_DIST};
 	bottomleft = (Vector2){-ASTEROID_MAX_DIST, -ASTEROID_MAX_DIST};
     list = state_objects(state,topright,bottomleft);
@@ -75,7 +75,7 @@ void test_state_create() {
 	ListNode crntnode = list_first(list);
 	Object crntobject;
 	// When the lists is finished
-	while (crntnode!=NULL){
+	while (crntnode!=LIST_EOF){
 		// We grab the current object from the list
 		crntobject = list_node_value(list,crntnode);
 
@@ -84,9 +84,9 @@ void test_state_create() {
         
 		// Check that the distance to the spaceship (0.0 currently) is within bounds 
 		float distsqr = (crntobject->position.x)*(crntobject->position.x) + (crntobject->position.y)*(crntobject->position.y);
-
-		TEST_ASSERT(distsqr <= ASTEROID_MAX_DIST*ASTEROID_MAX_DIST);
-		TEST_ASSERT(distsqr >= ASTEROID_MAX_DIST*ASTEROID_MAX_DIST);
+		
+		TEST_ASSERT(distsqr <= (ASTEROID_MAX_DIST*ASTEROID_MAX_DIST));
+		TEST_ASSERT(distsqr >= (ASTEROID_MIN_DIST*ASTEROID_MIN_DIST));
 		
 		// Check that the size of the asteroid is within acceptable bounds
 		TEST_ASSERT((crntobject->size <= ASTEROID_MAX_SIZE)&&(crntobject->size >= ASTEROID_MIN_SIZE));
