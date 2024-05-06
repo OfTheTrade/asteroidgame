@@ -129,3 +129,5 @@ struct of keys created by keypresses() is freed. keypressess itself simply uses 
 the key struct it creates with the correct bools.
 3. Interface_close is called to close the interface. state_destroy is used to destroy the state and the program returns zero.
 The program ends.
+
+The makefile is used to compile game.c

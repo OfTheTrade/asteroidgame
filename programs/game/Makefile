@@ -1,6 +1,7 @@
 # paths
 LIB = ../../lib
 INCLUDE = ../../include
+MODULES = ../../modules
 
 # compiler
 CC = gcc
@@ -10,7 +11,7 @@ CFLAGS = -Wall -Werror -g -I$(INCLUDE)
 LDFLAGS = -lm
 
 # Αρχεία .o
-OBJS = game.o state.o interface.o vec2.o $(LIB)/k08.a $(LIB)/libraylib.a
+OBJS = game.o $(MODULES)/state.o $(MODULES)/interface.o $(MODULES)/vec2.o $(LIB)/k08.a $(LIB)/libraylib.a
 
 # Το εκτελέσιμο πρόγραμμα
 EXEC = game
@@ -24,6 +25,8 @@ include $(LIB)/libraylib.mk
 
 $(EXEC): $(OBJS)
 	$(CC) $(OBJS) -o $(EXEC) $(LDFLAGS)
+
+
 
 # Για να φτιάξουμε τα k08.a/libraylib.a τρέχουμε το make στο lib directory.
 $(LIB)/%.a:
