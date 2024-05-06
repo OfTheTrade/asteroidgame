@@ -6,7 +6,6 @@
 #include "state.h"
 #include "vec2.h"
 
-
 // Οι ολοκληρωμένες πληροφορίες της κατάστασης του παιχνιδιού.
 // Ο τύπος State είναι pointer σε αυτό το struct, αλλά το ίδιο το struct
 // δεν είναι ορατό στον χρήστη.
@@ -131,7 +130,7 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 	int bottom_rightx=bottom_right.x;
 	int bottom_righty=bottom_right.y;
 
-    // Loop for every object contained in vector
+    // Loop for every object contained in the vector
 	for (int i=0;i<vector_size(state->objects);i++){
         
 		// The current object is taken from the vector, and it's cordinates are held
@@ -140,7 +139,7 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 		crnty=crntobject->position.y;
         
 		// If the object is located within the bounds set by top right and bottom left, it is inserted in the list
-		if ((top_leftx>=crntx)&(top_lefty>=crnty)&(bottom_rightx<=crntx)&(bottom_righty<=crnty)) list_insert_next(list,LIST_BOF,crntobject);
+		if ((top_leftx<=crntx)&&(top_lefty>=crnty)&&(bottom_rightx>=crntx)&&(bottom_righty<=crnty)) list_insert_next(list,LIST_BOF,crntobject);
 	}
     
 	// The filled list is returned
@@ -153,17 +152,20 @@ List state_objects(State state, Vector2 top_left, Vector2 bottom_right) {
 void state_update(State state, KeyState keys) {
 
     // If p is pressed the game is paused
-	if (keys->p == true) state->info.paused=true;
+	if (keys->p == true) state->info.paused= true;
     
 	// If the game isn't paused or n is pressed the state updates
 	
 	if ((state->info.paused == false)||(keys->n == true)){
 
         // Update the speed factor
+		
+		if (keys->enter == true) state->info.score = state->info.score + 100;
 		int scoreneeded = 1;
-		for (float i = (state->speed_factor - 1); i >= 0; i = i - 0.1) scoreneeded = scoreneeded*100;
-        if (state->info.score >= scoreneeded) state->speed_factor = state->speed_factor + 10;
+		for (float z = (state->speed_factor - 1); z >= 0; z = z - 0.2) scoreneeded = scoreneeded*10;
+        if (state->info.score >= scoreneeded) state->speed_factor = state->speed_factor + 0.3;
         
+		Object lastofvec;
         Object tempobject;
         Object crntobject;
 	    Object bulletobject;
@@ -174,7 +176,7 @@ void state_update(State state, KeyState keys) {
 			crntobject = vector_get_at(state->objects,i);
 			
 		    // Update the objects in the vector, changing their position according to their speed
-		    crntobject->position=vec2_scale(vec2_add(crntobject->position,crntobject->speed),state->speed_factor);
+		    crntobject->position=vec2_add(crntobject->position,vec2_scale(crntobject->speed,state->speed_factor));
 
  			// Check to see how many asteroids are near the ship. Calculates the distance between
 			// each asterpoid and the ship (raised to the second power) and checks that is <= the
@@ -187,8 +189,8 @@ void state_update(State state, KeyState keys) {
 
 		}
        
-	   // Collision checks
-       for(int i = 0;i<vector_size(state->objects);i++){
+	// Collision checks
+    for(int i = 0;i<vector_size(state->objects);i++){
 
           crntobject = vector_get_at(state->objects,i);
 
@@ -197,56 +199,94 @@ void state_update(State state, KeyState keys) {
 				// Check if this asteroid (crntobject) has colided with the spaceship
                 if (CheckCollisionCircles(state->info.spaceship->position,SPACESHIP_SIZE,crntobject->position,crntobject->size)){
 
-				    // Destroy the asteroid
-					vector_set_at(state->objects,i, vector_get_at(state->objects,vector_size(state->objects) - 1));
+				    // Destroy the asteroid. Save last nodes contents, switch current and and last node, remove last node.
+
+                    tempobject = malloc(sizeof(*tempobject));
+					lastofvec = vector_get_at(state->objects,vector_size(state->objects) - 1);
+					tempobject = create_object(
+						lastofvec->type,
+						lastofvec->position,
+						lastofvec->speed,
+						lastofvec->orientation,								
+						lastofvec->size		
+					);
+					vector_set_at(state->objects, i, tempobject);
 					vector_remove_last(state->objects);
+					i--;
 
 					// Update the score
 					state->info.score = (int)((state->info.score)/2);
 					
 			    }else{ 
                 
-				   // Check if this asteroid (crntobject) has colided with this bullet (crntbullet);
-			       for(int j = 0; j<vector_size(state->objects);j++){
+				    // Check if this asteroid (crntobject) has colided with this bullet (crntbullet);
+			        for(int j = 0; j<vector_size(state->objects);j++){
 
-				       bulletobject = vector_get_at(state->objects,j);	
+				        bulletobject = vector_get_at(state->objects,j);	
 
-				       // If the object is a bullet
-				       if (bulletobject->type == BULLET){
-					       // If it collides with this (crntobject) asteroid
-						   if (CheckCollisionCircles(state->info.spaceship->position,SPACESHIP_SIZE,bulletobject->position,BULLET_SIZE)){
+				        //If the object is a bullet
+				        if (bulletobject->type == BULLET){
+					        // If it collides with this (crntobject) asteroid
+						    if (CheckCollisionCircles(crntobject->position,crntobject->size,bulletobject->position,BULLET_SIZE)){
 
-							   // If the asteroid will break into two or dissapear
-							   if ( ( (crntobject->size)/2 ) >= ASTEROID_MIN_SIZE ){
+							    // If the asteroid will break into two or dissapear
+							    if ( ( (crntobject->size)/2 ) >= ASTEROID_MIN_SIZE ){
 
 								    // Add two smaller asteroids
                                     tempobject = create_object(ASTEROID,crntobject->position,vec2_rotate(vec2_scale(crntobject->speed,1.5),randf(0,2*PI)),(Vector2){0,0},(crntobject->size)/2 );
 								    vector_insert_last(state->objects,tempobject);
 
-								   tempobject = create_object(ASTEROID,crntobject->position,vec2_rotate(vec2_scale(crntobject->speed,1.5),randf(0,2*PI)),(Vector2){0,0},(crntobject->size)/2 );
-								   vector_insert_last(state->objects,tempobject);
-							   }
-							   // Destroy the asteroid and the bullet
-							   vector_set_at(state->objects,i, vector_get_at(state->objects,vector_size(state->objects) - 1));
-							   vector_remove_last(state->objects);
+								    tempobject = create_object(ASTEROID,crntobject->position,vec2_rotate(vec2_scale(crntobject->speed,1.5),randf(0,2*PI)),(Vector2){0,0},(crntobject->size)/2 );
+								    vector_insert_last(state->objects,tempobject);
 
-							   vector_set_at(state->objects,j, vector_get_at(state->objects,vector_size(state->objects) - 1));
-							   vector_remove_last(state->objects);
+							   	}
+                                
+								// In the second case, the asteroid and the bullet will have switched places once the asteroid is destroyed
+								int bulletlocation = j;
+								if (j == vector_size(state->objects) - 1) bulletlocation = i;
+
+							   	// Destroy the asteroid
+							   	tempobject = malloc(sizeof(*tempobject));
+								lastofvec = vector_get_at(state->objects,vector_size(state->objects) - 1);
+								tempobject = create_object(
+									lastofvec->type,
+									lastofvec->position,
+									lastofvec->speed,
+									lastofvec->orientation,								
+									lastofvec->size		
+								);
+								vector_set_at(state->objects, i, tempobject);
+								vector_remove_last(state->objects);
+							    i--;
+                                
+								// Destroy the bullet
+							    tempobject = malloc(sizeof(*tempobject));
+								lastofvec = vector_get_at(state->objects,vector_size(state->objects) - 1);
+									tempobject = create_object(
+									lastofvec->type,
+									lastofvec->position,
+									lastofvec->speed,
+									lastofvec->orientation,								
+									lastofvec->size		
+								);
+								vector_set_at(state->objects, bulletlocation, tempobject);
+								vector_remove_last(state->objects);
+							    j--;
                             
 							  // Update the score
 							  state->info.score = state->info.score - 10;
 							  if (state->info.score <= 0) state->info.score = 0;
-						   }
+						    }
 
-				       }
+				        }
 
-			      }
+			        }
 
 				}
 			
 			}
 
-	    }
+	    } 
 
 	   
 		// Add any asteroids needed to have ASTEROID_NUM many near the ship. Update the score
@@ -256,10 +296,16 @@ void state_update(State state, KeyState keys) {
 		}
 
 		// Update the spaceships location according to it's speed.
-		state->info.spaceship->position = vec2_scale(vec2_add(state->info.spaceship->position,state->info.spaceship->speed),state->speed_factor);
-          
+		state->info.spaceship->position = vec2_add(state->info.spaceship->position,vec2_scale(state->info.spaceship->speed,state->speed_factor));
 
-        // If the space key is pressed and a bullet has not been fire for 15 states, create a bullet
+		// If right is pressed move the spaceships orientation to the right
+		if (keys->right  == true) 
+		        state->info.spaceship->orientation = vec2_rotate(state->info.spaceship->orientation, -SPACESHIP_ROTATION);
+		// If left is pressed move the spaceships orientation to the left
+		if (keys->left == true) 
+		        state->info.spaceship->orientation = vec2_rotate(state->info.spaceship->orientation, SPACESHIP_ROTATION);
+		
+		// If the space key is pressed and a bullet has not been fire for 15 states, create a bullet
 		if ( (keys->space == true)&&(state->next_bullet <= 0) ){
 			state->next_bullet = BULLET_DELAY + 1;
 			// The bullet is created at the spaceship's location, with it's speed depending on the 
@@ -269,13 +315,6 @@ void state_update(State state, KeyState keys) {
 		}
 		state->next_bullet = state->next_bullet - 1;
 
-		// If right is pressed move the spaceships orientation to the right
-		if (keys->right  == true) 
-		        state->info.spaceship->orientation = vec2_rotate(state->info.spaceship->orientation, -SPACESHIP_ROTATION);
-		// If left is pressed move the spaceships orientation to the left
-		if (keys->left == true) 
-		        state->info.spaceship->orientation = vec2_rotate(state->info.spaceship->orientation, SPACESHIP_ROTATION);
-		  
 		// If up is pressed , add to the spaceship's speed.
 		if (keys->up == true){ 
 		    state->info.spaceship->speed = vec2_add(state->info.spaceship->speed,vec2_scale(state->info.spaceship->orientation,SPACESHIP_ACCELERATION));				
@@ -288,7 +327,7 @@ void state_update(State state, KeyState keys) {
 // Καταστρέφει την κατάσταση state ελευθερώνοντας τη δεσμευμένη μνήμη.
 
 void state_destroy(State state) {
-	// Free all parts of "state" that are in the heap and then "state" itself
+	//Free all parts of "state" that are in the heap and then "state" itself
 	free(state->info.spaceship);
     vector_destroy(state->objects);
 	free(state);

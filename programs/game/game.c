@@ -45,6 +45,7 @@ int main() {
 	start_main_loop(update_and_draw);
 
 	interface_close();
+	state_destroy(state);
 
 	return 0;
 }

@@ -18,7 +18,7 @@ __Α.Μ.__: sdi2300149
 - 1
 - 2
 - 3
-
+- 6
 ### Documentation
 
 Συμπληρώστε εδώ __όσο documentation χρειάζεται__ ώστε οι βαθμολογ
@@ -84,7 +84,7 @@ Part 3:
 In state.c, state_update was filled with the new requierments.
 
 Firstly, the function now updates "speed_factor" when called and the game is not paused. It figures out how many times
-it has been increased already from it's starting value of 1 and then checks if the game score is hight enough to cause
+it has been increased already from it's starting value of 1 and then checks if the game score is high enough to cause
 "speed_factor" to increase again. In the loop previously only used to change the coordinates of the objects in the states
 object vector, a counter has been set up to count how many asteroids are within ASTEROID_MAX_DIST of the ship. After it 
 exits the loop, if this ammount is less that ASTEROID_NUM, it adds enough asteroids for this number to become ASTEROID_NUM
@@ -97,3 +97,35 @@ that collides with the current asteroid. If it is, the asteroid and the bullet i
 score (without going bellow zero) and if the asteroid is big enough two smaller and faster asteroids are spawned at it's location.
 Lastly, the function now checks for a space key input. If it detects that, and it has been not been fired for 15 states, a bullet
 is created on the spaceship, with it's speed being affected by BULLET_SPEED and the spaceships rotation and speed.
+
+Part 5:
+In include, interface.h was added.
+In modules, interface.c was added.
+In program/game, program.c and a makefile was added.
+
+interface.h simply states the three function that initiate, update, and close the interface
+
+interface.c contains the implementation of those functions. It contains:
+1. interface_ititiate, that uses raylib to open the correct size of window and set the correct target fps
+2. interface_close, that simply uses raylib to close the window
+3. interface_draw_frame, that updates the interface for every frame. It uses raylib to begin drawing, first
+clearing the background to be black, then calculating some vectors that will be used to transform the state
+cordinates to interface cordinates. The midddlevector shows the middle of the screen, flippedorient and
+flippedposition are the spaceships orientation and position with the y cordinated reversed, while transform
+vector is the vector that will be added to the objects to move them to the correct interface cordinate.  It
+first draws the spaceship, making sure to flip it's y cordinate. It is made out of an isoskeles triangle, with
+each angle being 2π/3. A small circle also is drawn on it's front edge. The bounds of the space of the state
+that we will use are calculated, and state_objects is used to return a list of all objects within. Now we will
+access all nodes of the list, drawing either a bullet (full circle) or asteroid (line circle) on the cordinates
+given by adding the transform vector to the location vector of the object (with the y cordinate reversed). Lastly,
+an fps counter is drawn, and if the game is paused a pause message is also drawn. Raylib is used to stop drawing. 
+
+game.c uses all previous programs to finally make a functional game.
+1. It uses state_crate() to create a state. Then , interface_init() to initialize the interface.
+2. The raylib function start_main_loop is used to call the function update_and_draw repeatedly until the game window closes.
+Update and draw first uses the function keypresses to detect all keys pressed during this loop, then state_update is called
+with the current state and the key presses. interface_draw_frame is then called with the state to update the interface. The
+struct of keys created by keypresses() is freed. keypressess itself simply uses raylib to detect the pressed keys and updates
+the key struct it creates with the correct bools.
+3. Interface_close is called to close the interface. state_destroy is used to destroy the state and the program returns zero.
+The program ends.
