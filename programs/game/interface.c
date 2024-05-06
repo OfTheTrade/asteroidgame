@@ -5,7 +5,6 @@
 #include "state.h"
 #include "interface.h"
 
-
 void interface_init() {
 	// Open the window, set the target fps
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Asteroids");
@@ -22,11 +21,18 @@ void interface_draw_frame(State state) {
     // Start every frame on a black canvas
 	BeginDrawing();
 	ClearBackground(BLACK);
-
+    
+	// Will be used to adjust the cordinates of objects
     Vector2 middlevertice = (Vector2){SCREEN_WIDTH/2,SCREEN_HEIGHT/2};
+
+	Vector2 flippedposition = (Vector2){state_info(state)->spaceship->position.x,(-1)*(state_info(state)->spaceship->position.y)};
+	Vector2 flippedorient = (Vector2){state_info(state)->spaceship->orientation.x,(-1)*(state_info(state)->spaceship->orientation.y)};
+
+	Vector2 transformvector= vec2_add(middlevertice,vec2_scale(flippedposition,-1)); 
+
 	// Vectors to draw spaceship
-	Vector2 flippedvert = (Vector2){state_info(state)->spaceship->orientation.x,(-1)*(state_info(state)->spaceship->orientation.y)};
-	Vector2 topvertice = vec2_scale(flippedvert, SPACESHIP_SIZE);
+	
+	Vector2 topvertice = vec2_scale(flippedorient, SPACESHIP_SIZE);
 	Vector2 leftvertice = vec2_rotate(topvertice,(2*PI)/3);
 	Vector2 rightvertice = vec2_rotate(topvertice,(-1)*((2*PI)/3));
     
@@ -41,10 +47,7 @@ void interface_draw_frame(State state) {
 	float leftx = state_info(state)->spaceship->position.x - (SCREEN_WIDTH/2);
 	
 	// Take the objects within those bounds
-	List list = state_objects(state, (Vector2){rightx,topy}, (Vector2){leftx,bottomy});
-    
-	float screenposx;
-	float screenposy;
+	List list = state_objects(state, (Vector2){leftx,topy}, (Vector2){rightx,bottomy});
     
 	// Draw every object in the list
 	ListNode crntnode = list_first(list);
@@ -53,38 +56,26 @@ void interface_draw_frame(State state) {
 	while (crntnode != LIST_EOF){
 
 		crntobject = list_node_value(list,crntnode);
-        
+
 		// Position should be adjasted
-		if (leftx > 0){
-        	screenposx = crntobject->position.x - (leftx);
-		}else if(rightx < 0){
-			screenposx = crntobject->position.x - (rightx);
-		}
-        if (bottomy > 0){
-        	screenposy = crntobject->position.y - (bottomy);
-		}else if(topy < 0){
-			screenposy = crntobject->position.y - (topy);
-		}
-       
-        screenposy = screenposy - (SCREEN_HEIGHT);  
-        
+
+		Vector2 screenvec = vec2_add((Vector2){crntobject->position.x,(crntobject->position.y)*(-1)}, transformvector);
+		 
 		// Draw object
         if (crntobject->type == BULLET){
-			DrawCircle(screenposx, screenposy, BULLET_SIZE, WHITE);
+			DrawCircleV(screenvec, BULLET_SIZE, WHITE);
 		}else{
-            DrawCircleLines(screenposx, screenposy, crntobject->size, WHITE);
+            DrawCircleLines(screenvec.x,screenvec.y, crntobject->size, WHITE);
 		}
 
 		crntnode = list_next(list,crntnode);
 	}	
 
-    list_destroy(list);
-
 	// FPS counter and score
 	DrawText(TextFormat("%08i", state_info(state)->score), 20, 20, 40, WHITE);
 	DrawFPS(SCREEN_WIDTH - 80, 0);
 
-	// If the game is paused, make paused text
+	// If the game is paused, make pause text
 	if (state_info(state)->paused) {
 		DrawText(
 			"STOPPED || PRESS N TO RUN A FRAME",
