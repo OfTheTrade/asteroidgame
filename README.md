@@ -98,7 +98,7 @@ score (without going bellow zero) and if the asteroid is big enough two smaller 
 Lastly, the function now checks for a space key input. If it detects that, and it has been not been fired for 15 states, a bullet
 is created on the spaceship, with it's speed being affected by BULLET_SPEED and the spaceships rotation and speed.
 
-Part 5:
+Part 6:
 In include, interface.h was added.
 In modules, interface.c was added.
 In program/game, program.c and a makefile was added.
