@@ -308,9 +308,10 @@ void state_update(State state, KeyState keys) {
 		// If the space key is pressed and a bullet has not been fire for 15 states, create a bullet
 		if ( (keys->space == true)&&(state->next_bullet <= 0) ){
 			state->next_bullet = BULLET_DELAY + 1;
-			// The bullet is created at the spaceship's location, with it's speed depending on the 
+			// The bullet is created at the spaceship's nose, with it's speed depending on the 
 			// spaceships own speed and orientation as well as BULLET_SPEED.
-			Object bullet = create_object(BULLET, state->info.spaceship->position, vec2_add(state->info.spaceship->speed,vec2_scale(state->info.spaceship->orientation,BULLET_SPEED)),(Vector2){0,0},BULLET_SIZE);
+			Vector2 shipnose = vec2_add(state->info.spaceship->position,vec2_scale(state->info.spaceship->orientation,SPACESHIP_SIZE));
+			Object bullet = create_object(BULLET, shipnose, vec2_add(state->info.spaceship->speed,vec2_scale(state->info.spaceship->orientation,BULLET_SPEED)),(Vector2){0,0},BULLET_SIZE);
             vector_insert_last(state->objects, bullet);
 		}
 		state->next_bullet = state->next_bullet - 1;
