@@ -84,6 +84,7 @@ that it has turned from looking straight up).
 
 Part 3:
 In state.c, state_update was filled with the new requierments.
+A check for bullets was added to state_test.c.
 
 Firstly, the function now updates "speed_factor" when called and the game is not paused. It figures out how many times
 it has been increased already from it's starting value of 1 and then checks if the game score is high enough to cause
@@ -99,6 +100,12 @@ that collides with the current asteroid. If it is, the asteroid and the bullet i
 score (without going bellow zero) and if the asteroid is big enough two smaller and faster asteroids are spawned at it's location.
 Lastly, the function now checks for a space key input. If it detects that, and it has been not been fired for 15 states, a bullet
 is created on the spaceship, with it's speed being affected by BULLET_SPEED and the spaceships rotation and speed.
+
+In state_test, a test function was added named test_state_update_two(). It tests the abillity of the spaceship to fire bullets:
+1. It checks that pressing space spawns a bullet at the spaceships nose.
+2. It checks that that bullet was created with the correct data in it's struct.
+3. It checks that next frame the bullet will have moved according to it's speed.
+4. It checks that another bullet won't be fired until 15 frames have passed. Another bullet will be fired on the 16nth frame. 
 
 Part 4:
 In include, interface.h was added.

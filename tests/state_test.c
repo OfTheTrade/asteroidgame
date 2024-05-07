@@ -177,6 +177,85 @@ void test_state_update() {
 
 }
 
+void test_state_update_two(){
+
+	State state = state_create();
+    
+	// Only the fire bullet button is pressed
+    struct key_state keys = { false, false, false, false, false, false, false };
+	keys.space = true;
+    
+	// The state updates
+	state_update(state,&keys);
+
+	// The bullet is created at the spaceships nose. Since the ship has not moved, it's nose is located at {0, 1*SPACESHIPS_SIZE}
+	Vector2 bulletlocation = {0,1*SPACESHIP_SIZE};
+	List list = state_objects(state,bulletlocation,bulletlocation);
+
+    // The list should not be empty, it should contain only one object (the bullet)
+	TEST_ASSERT(list_first(list) != LIST_EOF);
+	TEST_ASSERT(list_size(list) == 1);
+    
+	Object crntobject = list_node_value(list,list_first(list));
+
+	// Check the object's data
+	// If it's a bullet
+    TEST_ASSERT(crntobject->type == BULLET);
+
+    // If it has the correct location
+	TEST_ASSERT(crntobject->position.x == bulletlocation.x);
+	TEST_ASSERT(crntobject->position.y == bulletlocation.y);
+
+	// If it has the correct speed
+	TEST_ASSERT(crntobject->speed.x == 0);
+	TEST_ASSERT(crntobject->speed.y == BULLET_SPEED);
+
+	// If it has the correct size
+	TEST_ASSERT(crntobject->size == BULLET_SIZE);
+
+	// If it has the correct orientation (always 0,0)
+   	TEST_ASSERT(crntobject->orientation.x == 0);
+	TEST_ASSERT(crntobject->orientation.y == 0);
+
+	
+
+	state_update(state,&keys);
+
+	// The location should have changed according to the speed
+	TEST_ASSERT(crntobject->position.x == 0);
+	TEST_ASSERT(crntobject->position.y == bulletlocation.y + BULLET_SPEED );
+	
+	// Even though the fire button is pressed, no bullet should have spawned, as not enough frames have passed yet
+    list = state_objects(state,bulletlocation,bulletlocation);
+
+	TEST_ASSERT(list_first(list) == LIST_EOF);
+
+    // 15 updates + the previous one 
+	state_update(state,&keys);
+	state_update(state,&keys);
+	state_update(state,&keys);
+	state_update(state,&keys);
+	state_update(state,&keys);
+	state_update(state,&keys);
+	state_update(state,&keys);
+	state_update(state,&keys);
+	state_update(state,&keys);
+	state_update(state,&keys);
+	state_update(state,&keys);
+	state_update(state,&keys);
+	state_update(state,&keys);
+	state_update(state,&keys);
+	state_update(state,&keys);
+
+    // On the 16nth frame, a bullet should have been spawned
+	list = state_objects(state,bulletlocation,bulletlocation);
+
+	TEST_ASSERT(list_first(list) != LIST_EOF);
+
+	state_destroy(state);
+
+}
+
 void test_set_utils(){
 
 	// Compare function returns positive if the first int is bigger, zero if they are equal or negative otherwise
@@ -251,6 +330,7 @@ void test_set_utils(){
 TEST_LIST = {
 	{ "test_state_create", test_state_create },
 	{ "test_state_update", test_state_update },
+	{ "test_state_update_two", test_state_update_two },
     { "test_state_utils" , test_set_utils },
 	{ NULL, NULL } // τερματίζουμε τη λίστα με NULL
 };
