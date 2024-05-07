@@ -9,6 +9,7 @@
 #include "acutest.h"			// Απλή βιβλιοθήκη για unit testing
 
 #include "state.h"
+#include "set_utils.h"
 
 
 ///// Βοηθητικές συναρτήσεις ////////////////////////////////////////
@@ -24,7 +25,6 @@ static bool vec2_equal(Vector2 a, Vector2 b) {
 	return double_equal(a.x, b.x) && double_equal(a.y, b.y);
 }
 /////////////////////////////////////////////////////////////////////
-
 
 void test_state_create() {
 
@@ -51,9 +51,9 @@ void test_state_create() {
 
     // The area of the screen is set so to this size (<ASTEROID_MAX_DIST) so that it 
 	// does not contain any of the asteroids created by state_create  
-    Vector2 topright = (Vector2){1,1}; 
-	Vector2 bottomleft = (Vector2){-1, -1};
-    List list = state_objects(state,topright,bottomleft);
+    Vector2 topleft = (Vector2){-1,1}; 
+	Vector2 bottomright = (Vector2){1, -1};
+    List list = state_objects(state,topleft,bottomright);
     
 	// The list should exist and contain all asteroids contained in the area set by topright and bottomleft 
 	// None, in this case
@@ -62,9 +62,9 @@ void test_state_create() {
 
     // This area of the screen is set to this size (>ASTEROID_MAX_DIST) so that it contains 
 	// all asteroids created by state_create 
-    topright = (Vector2){ASTEROID_MAX_DIST, ASTEROID_MAX_DIST};
-	bottomleft = (Vector2){-ASTEROID_MAX_DIST, -ASTEROID_MAX_DIST};
-    list = state_objects(state,topright,bottomleft);
+    topleft = (Vector2){-ASTEROID_MAX_DIST, ASTEROID_MAX_DIST};
+	bottomright = (Vector2){ASTEROID_MAX_DIST, -ASTEROID_MAX_DIST};
+    list = state_objects(state,topleft,bottomright);
     
 	// The list should exist and contain all asteroids contained in the area set by topright and bottomleft
 	// In this case all (ASTEROID_NUM many) asteroids created by state_create
@@ -175,10 +175,74 @@ void test_state_update() {
 
 	state_destroy(state);
 
-    //// TESTS FOR COLLISIONS
+}
 
-	state_create(state);
+void test_set_utils(){
 
+	// Compare function returns positive if the first int is bigger, zero if they are equal or negative otherwise
+	Set set = set_create((CompareFunc)strcmp,NULL);
+
+	char* string1 = "aa";
+	set_insert(set,string1);
+
+	char* string2 = "an";
+	set_insert(set,string2);
+
+	char* string3 = "ag";
+	set_insert(set,string3);
+
+	char* string4 = "ad";
+    set_insert(set,string4);
+    
+	SetNode node = set_first(set);
+
+    // List should not be empty
+	TEST_ASSERT( node != SET_EOF );
+
+	// Check for correct size
+	TEST_ASSERT(set_size(set) == 4);
+
+    // First compare the first two nodes
+	char* crntvalue;
+	char* previousvalue = set_node_value(set, node);
+	node = set_next(set, node);
+	
+
+	// Set should be in ascending order
+	while (node != SET_EOF){
+		crntvalue = set_node_value(set, node);
+
+        TEST_ASSERT(strcmp(crntvalue,previousvalue) > 0);
+
+		previousvalue = crntvalue;
+		node = set_next(set, node);
+	}
+
+	// "ag" is contained in the set
+	char* string5 = "ag";
+	crntvalue = set_find_eq_or_greater(set, string5);
+
+	TEST_ASSERT( strcmp(crntvalue,"ag") == 0 );
+
+	// "ad" is contained in the set 
+	char* string6 = "ad";
+	crntvalue = set_find_eq_or_smaller(set, string6);
+
+	TEST_ASSERT( strcmp(crntvalue,"ad") == 0 );
+
+	// ac is not contained in the set. It's bigger than "aa"
+	char* string7 = "ac";
+	crntvalue = set_find_eq_or_greater(set, string7);
+
+	TEST_ASSERT( strcmp(crntvalue,"ad") == 0 );
+   
+    // ac is not contained in the set. It's smaller than "ad"
+    char* string8 = "ac";
+	crntvalue = set_find_eq_or_smaller(set, string8);
+
+	TEST_ASSERT( strcmp(crntvalue,"aa") == 0 );
+
+	set_destroy(set);
 
 }
 
@@ -187,6 +251,6 @@ void test_state_update() {
 TEST_LIST = {
 	{ "test_state_create", test_state_create },
 	{ "test_state_update", test_state_update },
-
+    { "test_state_utils" , test_set_utils },
 	{ NULL, NULL } // τερματίζουμε τη λίστα με NULL
 };

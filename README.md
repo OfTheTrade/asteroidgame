@@ -18,6 +18,8 @@ __Α.Μ.__: sdi2300149
 - 1
 - 2
 - 3
+- 4
+-
 - 6
 ### Documentation
 
@@ -97,6 +99,24 @@ that collides with the current asteroid. If it is, the asteroid and the bullet i
 score (without going bellow zero) and if the asteroid is big enough two smaller and faster asteroids are spawned at it's location.
 Lastly, the function now checks for a space key input. If it detects that, and it has been not been fired for 15 states, a bullet
 is created on the spaceship, with it's speed being affected by BULLET_SPEED and the spaceships rotation and speed.
+
+Part 4:
+In include, interface.h was added.
+In modules, interface.c was added.
+In tests, state_test was updated to include a test called test_set_utils.
+
+1. interface.h is a header file containing the statement of two function, set_find_eq_or_greater() and set_find_eq_or_smaller().
+2. interface.c contains the implementation of those two. set_find_eq_or_greater does on of two things. If the given value is
+contained inside the given set, that value is returned. If it not, then the value is inserted into the set, the new node containing
+the value is found, the next node is reached (containing the next "biggest", according to the comparison function of the set) and
+after the node containing the original value is removed, the value of the next node is returned. The same thing happens for
+set_find_eq_or_smaller, except that the previous node's value is returned.
+3. state_test.c now contains a function called test_set_utils. First it fills the set with some strings. It checks that the first
+node is not SET_EOF (that it is not empty) and that the size of the list is correct. It then accesses the nodes linearly, making sure
+that they are in ascending order (according to the comparison function). Lastly, set_find_eq_or_greater and set_find_eq_or_smaller
+are checked, first that if they are given a value that is already inside the set, they will return that value, and if they are given
+something else, they will return the next biggest or smallest value.
+
 
 Part 6:
 In include, interface.h was added.
