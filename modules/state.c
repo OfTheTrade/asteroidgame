@@ -199,7 +199,7 @@ void state_update(State state, KeyState keys) {
 				// Check if this asteroid (crntobject) has colided with the spaceship
                 if (CheckCollisionCircles(state->info.spaceship->position,SPACESHIP_SIZE,crntobject->position,crntobject->size)){
 
-				    // Destroy the asteroid. Save last nodes contents, switch current and and last node, remove last node.
+				    // Destroy the asteroid. Save last nodes contents, switch current and and last node, remove last node
 
                     tempobject = malloc(sizeof(*tempobject));
 					lastofvec = vector_get_at(state->objects,vector_size(state->objects) - 1);
@@ -228,7 +228,10 @@ void state_update(State state, KeyState keys) {
 				        if (bulletobject->type == BULLET){
 					        // If it collides with this (crntobject) asteroid
 						    if (CheckCollisionCircles(crntobject->position,crntobject->size,bulletobject->position,BULLET_SIZE)){
-
+								InitAudioDevice();
+								Sound gyat = LoadSound("audio/byron.acc");
+								UnloadSound(gyat);
+								CloseAudioDevice();
 							    // If the asteroid will break into two or dissapear
 							    if ( ( (crntobject->size)/2 ) >= ASTEROID_MIN_SIZE ){
 
