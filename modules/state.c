@@ -229,7 +229,7 @@ void state_update(State state, KeyState keys) {
 					        // If it collides with this (crntobject) asteroid
 						    if (CheckCollisionCircles(crntobject->position,crntobject->size,bulletobject->position,BULLET_SIZE)){
 								InitAudioDevice();
-								Sound gyat = LoadSound("audio/byron.acc");
+								Sound gyat = LoadSound("audio/byron.wav");
 								UnloadSound(gyat);
 								CloseAudioDevice();
 							    // If the asteroid will break into two or dissapear
