@@ -228,10 +228,6 @@ void state_update(State state, KeyState keys) {
 				        if (bulletobject->type == BULLET){
 					        // If it collides with this (crntobject) asteroid
 						    if (CheckCollisionCircles(crntobject->position,crntobject->size,bulletobject->position,BULLET_SIZE)){
-								InitAudioDevice();
-								Sound gyat = LoadSound("audio_byron.wav");
-								UnloadSound(gyat);
-								CloseAudioDevice();
 							    // If the asteroid will break into two or dissapear
 							    if ( ( (crntobject->size)/2 ) >= ASTEROID_MIN_SIZE ){
 
